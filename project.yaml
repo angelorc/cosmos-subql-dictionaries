@@ -1,0 +1,90 @@
+specVersion: 1.0.0
+name: osmosis-dictionary
+version: 1.0.0
+runner:
+  node:
+    name: "@subql/node-cosmos"
+    version: "*"
+    options:
+      unfinalizedBlocks: false
+      historical: false
+  query:
+    name: "@subql/query"
+    version: "*"
+description: A SubQuery project provide dictionary data & service for the BitSong network
+schema:
+  file: ./schema.graphql
+network:
+  chainId: bitsong-2b
+  endpoint: "https://rpc.explorebitsong.com"
+  chaintypes: # This is a beta feature that allows support for any Cosmos chain by importing the correct protobuf messages
+    bitsong.fantoken:
+      file: ./proto/bitsong/fantoken/v1beta1/tx.proto
+      messages:
+        - MsgIssue
+        - MsgDisableMint
+        - MsgMint
+        - MsgBurn
+        - MsgSetMinter
+        - MsgSetAuthority
+        - MsgSetUri
+    bitsong.fantoken.v1beta1:
+      file: ./proto/bitsong/fantoken/v1beta1/events.proto
+      messages:
+        - EventIssue
+        - EventDisableMint
+        - EventMint
+        - EventBurn
+        - EventSetAuthority
+        - EventSetMinter
+        - EventSetUri
+    bitsong.merkledrop:
+      file: ./proto/bitsong/merkledrop/v1beta1/tx.proto
+      messages:
+        - MsgCreate
+        - MsgClaim
+    bitsong.merkledrop.v1beta1:
+      file: ./proto/bitsong/merkledrop/v1beta1/events.proto
+      messages:
+        - EventCreate
+        - EventClaim
+        - EventWithdraw
+    cosmos.slashing.v1beta1:
+      file: "./proto/cosmos/slashing/v1beta1/tx.proto"
+      messages:
+        - "MsgUnjail"
+    cosmos.gov.v1beta1:
+      file: "./proto/cosmos/gov/v1beta1/tx.proto"
+      messages:
+        - "MsgVoteWeighted"
+    cosmos.gov.v1beta1.gov: # Key is not used, it matches the one above and is inferred from the file
+      file: "./proto/cosmos/gov/v1beta1/gov.proto"
+      messages:
+        - "WeightedVoteOption"
+    cosmos.base.v1beta1: # needed by MsgCreateVestingAccount
+      file: "./proto/cosmos/cosmos.base.v1beta1.coin.proto"
+      messages:
+        - "Coin"
+    cosmwasm.wasm.v1:
+      file: "./proto/cosmwasm/wasm/v1/tx.proto"
+      messages:
+        - "MsgInstantiateContract2"
+    google.protobuf:
+      file: "./proto/google/protobuf/duration.proto"
+      messages:
+        - Duration
+    google.protobuf.timestamp:
+      file: "./proto/google/protobuf/timestamp.proto"
+      messages:
+        - Timestamp
+
+dataSources:
+  - kind: cosmos/Runtime
+    startBlock: 2966151
+    mapping:
+      file: ./dist/index.js
+      handlers:
+        - handler: handleEvent
+          kind: cosmos/EventHandler
+        - handler: handleMessage
+          kind: cosmos/MessageHandler
